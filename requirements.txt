@@ -6,3 +6,4 @@ starlette
 starlette-context
 requests
 beautifulsoup4
+mangum

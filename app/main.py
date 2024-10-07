@@ -7,6 +7,8 @@ from starlette_context.middleware import RawContextMiddleware
 from fastapi import FastAPI
 from app.logger.log import logger
 from app.routers import find_jobs_router
+from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 
 app = FastAPI(
     title="BE - Job4U",
@@ -14,6 +16,9 @@ app = FastAPI(
     version="0.0.1"
 )
 
+allowed_origins = [
+    "http://localhost:3000",  # Frontend URL
+]
 
 async def catch_exception_middleware(request: Request, call_next):
     logger.send_log({
@@ -38,11 +43,25 @@ async def catch_exception_middleware(request: Request, call_next):
             "message": "Internal server error"},
             status_code=500)
 
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,  # Allows the specified origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods
+    allow_headers=["*"],  # Allows all headers
+)
 app.middleware('http')(catch_exception_middleware)
 app.add_middleware(RawContextMiddleware, plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()))
 
 app.include_router(find_jobs_router.router)
+handler = Mangum(app)
 
+
+@app.get("/")
+async def root():
+    return {'message': 'Hello from Jobs4U'}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
