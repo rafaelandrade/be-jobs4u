@@ -17,7 +17,7 @@ app = FastAPI(
 )
 
 allowed_origins = [
-    "http://localhost:3000",  # Frontend URL
+    "http://localhost:3000",
 ]
 
 async def catch_exception_middleware(request: Request, call_next):
@@ -32,7 +32,7 @@ async def catch_exception_middleware(request: Request, call_next):
         response = await call_next(request)
         process_time = round((time.time() - start_time) * 1000, 2)
         logger.send_log({"process_time": process_time,
-                  "status": response.status_code})
+                        "status": response.status_code})
 
         return response
     except Exception as exception:
@@ -47,10 +47,10 @@ async def catch_exception_middleware(request: Request, call_next):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  # Allows the specified origins
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.middleware('http')(catch_exception_middleware)
 app.add_middleware(RawContextMiddleware, plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()))
